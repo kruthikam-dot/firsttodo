@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Daymark | Daily tasks</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .clear-button{padding:7px 10px;border:1px solid var(--line);border-radius:7px;background:var(--white);color:var(--muted);font-size:.72rem;font-weight:700}.clear-button:hover:not(:disabled){border-color:var(--coral);color:var(--coral-dark)}.clear-button:disabled{cursor:not-allowed;opacity:.45}
+    .dashboard{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:30px 0 42px}.dashboard-card,.reminder-panel{border:1px solid var(--line);background:var(--white);box-shadow:var(--shadow)}.dashboard-card{display:flex;align-items:center;gap:14px;padding:18px 20px;border-radius:12px}.dashboard-icon{display:grid;width:34px;height:34px;place-items:center;border-radius:50%;background:var(--sun);font:700 1.3rem "Space Grotesk",sans-serif}.dashboard-card:nth-child(2) .dashboard-icon{background:var(--mint)}.dashboard-card strong{display:block;font:700 1.7rem "Space Grotesk",sans-serif;line-height:1}.dashboard-card span:not(.dashboard-icon){color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.1em}.reminder-panel{grid-column:1/-1;padding:22px 24px;border-radius:14px}.reminder-panel .section-heading{margin-bottom:16px}.reminder-bell{font-size:1.3rem}.reminder-list{display:grid;gap:9px}.reminder-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}.reminder-item>span{display:grid;width:26px;height:26px;place-items:center;border-radius:50%;background:var(--sun);font-weight:700}.reminder-item strong,.reminder-item small{display:block}.reminder-item strong{font-size:.9rem}.reminder-item small,.no-reminders{margin:3px 0 0;color:var(--muted);font-size:.75rem}.task-content{min-width:0;flex:1}.task-meta{display:flex;flex-wrap:wrap;gap:4px 12px}.deadline-status{font-size:.73rem;font-weight:700}.status-overdue{border-color:var(--coral-dark);background:#fff5f1}.status-overdue .deadline-status{color:var(--coral-dark)}.status-soon .deadline-status{color:#a06b00}.status-completed .deadline-status{color:#377c5f}.edit-button{padding:6px 8px;color:var(--muted);background:none;border:0;font-size:.75rem;text-decoration:underline;text-underline-offset:3px}.edit-button:hover{color:var(--ink)}
+    @media(max-width:640px){.dashboard{grid-template-columns:1fr;margin-top:24px}.reminder-panel{grid-column:auto;padding:18px}.task-item{align-items:start;flex-wrap:wrap}.task-content{order:1;width:calc(100% - 44px)}.task-item .edit-button{margin-left:44px}.task-item .delete-button{margin-left:auto}.deadline-status{width:100%}}
+  </style>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="."><span class="brand-mark">D</span> daymark</a>
+      <p class="today-label" id="today-label"></p>
+    </header>
+
+    <section class="intro" aria-labelledby="page-title">
+      <div><p class="eyebrow">Your day, in focus</p><h1 id="page-title">Make today<br><em>count.</em></h1></div>
+      <div class="progress-note"><strong id="progress-number">0%</strong><span>of your list<br>is complete</span></div>
+    </section>
+
+    <section class="quick-add" aria-labelledby="quick-add-title">
+      <div class="section-heading"><div><p class="eyebrow">Capture it</p><h2 id="quick-add-title">What needs doing?</h2></div><span class="spark" aria-hidden="true">*</span></div>
+      <form id="task-form" class="task-form">
+        <label class="sr-only" for="task-input">Task name</label>
+        <input id="task-input" type="text" maxlength="120" placeholder="Add a task to your day..." autocomplete="off" required>
+        <label class="date-field" for="due-date"><span aria-hidden="true">Due</span><span class="sr-only">Due date and time</span><input id="due-date" type="datetime-local"></label>
+        <button class="add-button" type="submit">Add task <span aria-hidden="true">+</span></button>
+      </form>
+    </section>
+
+    <section class="task-section" aria-labelledby="task-list-title">
+      <div class="list-header"><div><p class="eyebrow">Your rhythm</p><h2 id="task-list-title">Today's tasks <span class="count-badge" id="task-count">0</span></h2></div>
+        <div class="filters" role="tablist" aria-label="Task filters">
+          <button class="filter-button is-active" type="button" role="tab" aria-selected="true" data-filter="all">All</button>
+          <button class="filter-button" type="button" role="tab" aria-selected="false" data-filter="active">Open</button>
+          <button class="filter-button" type="button" role="tab" aria-selected="false" data-filter="completed">Done</button>
+        </div>
+        <button class="clear-button" id="clear-completed" type="button" disabled>Clear done</button>
+      </div>
+      <div id="task-list" class="task-list" aria-live="polite"></div>
+      <div id="empty-state" class="empty-state" hidden><span class="empty-icon" aria-hidden="true">*</span><h3 id="empty-title">A clear slate.</h3><p id="empty-copy">Add one small thing and give your day a direction.</p></div>
+    </section>
+    <section class="dashboard" aria-label="Deadline summary">
+      <div class="dashboard-card"><span class="dashboard-icon">!</span><div><strong id="overdue-count">0</strong><span>overdue</span></div></div>
+      <div class="dashboard-card"><span class="dashboard-icon">~</span><div><strong id="upcoming-count">0</strong><span>upcoming</span></div></div>
+      <div class="reminder-panel"><div class="section-heading"><div><p class="eyebrow">Keep an eye on it</p><h2>Deadline reminders</h2></div><span class="reminder-bell" aria-hidden="true">&#128276;</span></div><div id="reminder-list" class="reminder-list" aria-live="polite"></div></div>
+    </section>
+    <p class="status-message" id="status-message" role="status" aria-live="polite"></p>
+    <footer class="app-footer"><span>Small steps, real momentum.</span><span class="footer-dot"></span><span>Saved on this server</span></footer>
+  </main>
+</body>
+</html>
